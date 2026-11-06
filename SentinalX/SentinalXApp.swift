@@ -2,16 +2,18 @@
 //  SentinalXApp.swift
 //  SentinalX
 //
-//  Created by Apple on 05/11/26.
-//
 
+import SwiftData
 import SwiftUI
 
 @main
 struct SentinalXApp: App {
+    private let container = AppPersistence.container
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView(container: container)
         }
+        .modelContainer(container)
     }
 }
