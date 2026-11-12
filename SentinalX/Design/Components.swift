@@ -103,69 +103,25 @@ struct NoticeBanner: View {
     var onDismiss: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "info.circle.fill")
-                .foregroundStyle(SX.accent)
-                .padding(.top, 2)
-            Text(text)
-                .font(.subheadline)
-                .foregroundStyle(SX.ink)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(SX.secondary)
-                    .padding(6)
+        AppCard(padding: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundStyle(SX.accent)
+                    .padding(.top, 2)
+                Text(text)
+                    .font(.subheadline)
+                    .foregroundStyle(SX.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(SX.secondary)
+                        .padding(6)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Dismiss")
         }
-        .sxCard(padding: 14)
-    }
-}
-
-struct FillButton: View {
-    var title: String
-    var symbol: String
-    var tint: Color
-    var enabled: Bool = true
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: {
-            if enabled { action() }
-        }) {
-            Label(title, systemImage: symbol)
-        }
-        .buttonStyle(FillButtonStyle(tint: tint, enabled: enabled))
-        // `.disabled` adds the system dim overlay, which turns this label black
-        // on a black wash. Block taps ourselves and keep the colors we draw.
-        .allowsHitTesting(enabled)
-        .accessibilityAddTraits(enabled ? [] : .isStaticText)
-    }
-}
-
-/// Draws the filled capsule itself. The system disabled style was stacking a
-/// dark wash on top of near-black text, which made "Cannot arm" unreadable.
-private struct FillButtonStyle: ButtonStyle {
-    var tint: Color
-    var enabled: Bool
-
-    @Environment(\.colorScheme) private var scheme
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .foregroundStyle(enabled ? SX.labelOnFill(scheme) : SX.ink)
-            .background {
-                Capsule().fill(enabled ? tint : SX.surfaceRaised)
-            }
-            .overlay {
-                Capsule().strokeBorder(SX.stroke, lineWidth: enabled ? 0 : 1)
-            }
-            .opacity(configuration.isPressed && enabled ? 0.88 : 1)
     }
 }
 
@@ -178,25 +134,26 @@ struct MetricTile: View {
     var progress: Double?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(title, systemImage: symbol)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(SX.secondary)
-            Text(value)
-                .font(.system(.title3, design: .rounded, weight: .semibold))
-                .foregroundStyle(tint)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            if let progress {
-                MeterBar(progress: progress, tint: tint)
+        AppCard(padding: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Label(title, systemImage: symbol)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(SX.secondary)
+                Text(value)
+                    .font(.system(.title3, design: .rounded, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                if let progress {
+                    MeterBar(progress: progress, tint: tint)
+                }
+                Text(caption)
+                    .font(.footnote)
+                    .foregroundStyle(SX.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Text(caption)
-                .font(.footnote)
-                .foregroundStyle(SX.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .sxCard(padding: 16)
     }
 }
 

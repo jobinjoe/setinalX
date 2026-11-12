@@ -43,6 +43,10 @@ Dependency direction is one way. Views talk to screen models. Screen models talk
 
 `AppModel` is the composition root. It is the only place that knows to use SwiftData and JSONPlaceholder together. Previews pass an in-memory store and a stub client instead.
 
+## UI (Lab 01)
+
+`SentinalX/Design/AppButton.swift`, `AppCard.swift`, `AppSheet.swift`, and `AppTextField.swift` are copied from the Lab 01 **SwiftUIComponentLibrary** project and restyled with `Theme.swift` (`SX` tokens). Login, zone cards, metric tiles, settings confirms, and primary actions call these types. Monitoring-only views (`StatusPill`, `ChipRow`, `RingGauge`, `PINEntrySheet`) remain SentinalX-specific.
+
 ## Arming
 
 `ArmingService` is a value type. `arm`, `disarm`, and `apply` take snapshots in and return new snapshots. They never mutate the caller's array, and they never open the database.

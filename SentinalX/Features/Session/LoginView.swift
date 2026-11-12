@@ -89,73 +89,55 @@ struct LoginView: View {
     }
 
     private var form: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Sign in")
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(SX.ink)
+        AppCard(padding: 20) {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Sign in")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(SX.ink)
 
-            field(icon: "envelope", prompt: "Email") {
-                TextField("Email", text: $email)
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    #endif
-                    .autocorrectionDisabled()
-            }
+                AppTextField(
+                    title: "",
+                    placeholder: "Email",
+                    text: $email,
+                    systemImage: "envelope"
+                )
 
-            field(icon: "lock", prompt: "Password") {
-                SecureField("Password", text: $password)
-                    .onSubmit(submit)
-            }
+                AppTextField(
+                    title: "",
+                    placeholder: "Password",
+                    text: $password,
+                    isSecure: true,
+                    systemImage: "lock",
+                    onSubmit: submit
+                )
 
-            if let errorText {
-                Text(errorText)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(SX.critical)
-            }
+                if let errorText {
+                    Text(errorText)
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(SX.critical)
+                }
 
-            FillButton(title: "Sign in", symbol: "arrow.right", tint: SX.accent, action: submit)
+                AppButton(
+                    title: "Sign in",
+                    style: .primary,
+                    systemImage: "arrow.right",
+                    tint: SX.accent,
+                    action: submit
+                )
                 .padding(.top, 4)
 
-            Button(action: fillDemo) {
-                Text("Use demo access")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                AppButton(
+                    title: "Use demo access",
+                    style: .outlined,
+                    action: fillDemo
+                )
+
+                Text("Demo · \(DemoAccess.suggestedEmail) · \(DemoAccess.password)")
+                    .font(.footnote)
+                    .foregroundStyle(SX.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(SX.accent)
-
-            Text("Demo · \(DemoAccess.suggestedEmail) · \(DemoAccess.password)")
-                .font(.footnote)
-                .foregroundStyle(SX.secondary)
-                .frame(maxWidth: .infinity, alignment: .center)
         }
-        .padding(20)
-        .background(SX.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(SX.stroke, lineWidth: 1)
-        )
-    }
-
-    private func field<Control: View>(icon: String, prompt: String, @ViewBuilder control: () -> Control) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .foregroundStyle(SX.secondary)
-                .frame(width: 20)
-            control()
-                .foregroundStyle(SX.ink)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(SX.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(SX.stroke, lineWidth: 1)
-        )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(prompt)
     }
 
     private func fillDemo() {

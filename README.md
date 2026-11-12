@@ -26,6 +26,10 @@ Screenshots live in [`docs/screenshots`](docs/screenshots). They are documentati
 
 **Settings.** Operator name, disarm PIN, live-feed on or off, poll interval, haptics, theme, clear the log, restore the demo zones, and sign out.
 
+### Lab 01 components
+
+Four files from the sibling **SwiftUIComponentLibrary** project live in `SentinalX/Design/`. They keep the Lab 01 API (`AppButton`, `AppCard`, `appSheet`, `AppTextField`) but use SentinalX colors, 24pt card corners, and capsule buttons so the app looks the same as before. The disarm PIN keypad stays a custom `PINEntrySheet` because Lab 01’s sheet always shows a single confirm action.
+
 ## Requirements
 
 - macOS with Xcode 26.2 or newer. The project was created with Xcode 26.2.
@@ -143,7 +147,7 @@ flowchart TD
 | `SentinalX/Data/Persistence` | SwiftData records, `ZoneStore`, `EventLog`, and the six-zone demo catalog. |
 | `SentinalX/Data/Network` | `EventFeedClient` and the JSONPlaceholder implementation. |
 | `SentinalX/Features` | Login, zones, activity, settings, and the models behind those screens. |
-| `SentinalX/Design` | Colors, cards, the PIN sheet, and the filled buttons. |
+| `SentinalX/Design` | Lab 01 `AppButton`, `AppCard`, `AppSheet`, and `AppTextField` (copied from [SwiftUIComponentLibrary](../SwiftUIComponentLibrary) and restyled with `SX` tokens), plus `StatusPill`, `ChipRow`, and the custom `PINEntrySheet`. |
 | `SentinalXTests` | Arm and disarm tests. |
 
 ### Arming rules

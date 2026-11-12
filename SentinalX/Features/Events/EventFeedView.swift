@@ -82,19 +82,20 @@ struct EventFeedView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 12) {
-            LiveDot(active: app.feed.link == .live, color: dotColor)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(linkTitle)
-                    .font(.headline)
-                    .foregroundStyle(SX.ink)
-                Text(linkSubtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(SX.secondary)
+        AppCard {
+            HStack(spacing: 12) {
+                LiveDot(active: app.feed.link == .live, color: dotColor)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(linkTitle)
+                        .font(.headline)
+                        .foregroundStyle(SX.ink)
+                    Text(linkSubtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(SX.secondary)
+                }
+                Spacer()
             }
-            Spacer()
         }
-        .sxCard()
     }
 
     private var dotColor: Color {

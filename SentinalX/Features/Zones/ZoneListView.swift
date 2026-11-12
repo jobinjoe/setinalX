@@ -94,6 +94,12 @@ struct ZoneListView: View {
     }
 
     private var postureCard: some View {
+        AppCard(padding: 18) {
+            postureContent
+        }
+    }
+
+    private var postureContent: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
                 Circle()
@@ -129,7 +135,6 @@ struct ZoneListView: View {
             }
             Spacer(minLength: 0)
         }
-        .sxCard(padding: 18)
         .accessibilityElement(children: .combine)
     }
 
@@ -218,6 +223,14 @@ struct ZoneCard: View {
     var zone: ZoneSnapshot
 
     var body: some View {
+        AppCard(padding: 14) {
+            zoneRow
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Opens zone details")
+    }
+
+    private var zoneRow: some View {
         HStack(spacing: 14) {
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -252,8 +265,5 @@ struct ZoneCard: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(SX.secondary)
         }
-        .sxCard(padding: 14)
-        .accessibilityElement(children: .combine)
-        .accessibilityHint("Opens zone details")
     }
 }

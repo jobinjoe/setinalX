@@ -61,59 +61,66 @@ struct ZoneDetailView: View {
     }
 
     private func hero(_ zone: ZoneSnapshot) -> some View {
-        HStack(alignment: .center, spacing: 16) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill((zone.isArmed ? SX.armed : SX.safe).opacity(0.16))
-                    .frame(width: 72, height: 72)
-                Image(systemName: zone.kind.symbol)
-                    .font(.system(size: 30, weight: .semibold))
-                    .foregroundStyle(zone.isArmed ? SX.armed : SX.safe)
+        AppCard(padding: 18) {
+            HStack(alignment: .center, spacing: 16) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .fill((zone.isArmed ? SX.armed : SX.safe).opacity(0.16))
+                        .frame(width: 72, height: 72)
+                    Image(systemName: zone.kind.symbol)
+                        .font(.system(size: 30, weight: .semibold))
+                        .foregroundStyle(zone.isArmed ? SX.armed : SX.safe)
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(zone.name)
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .foregroundStyle(SX.ink)
+                    Text("\(zone.role.label) · \(zone.kind.label)")
+                        .font(.subheadline)
+                        .foregroundStyle(SX.secondary)
+                    StatusPill(armed: zone.isArmed)
+                }
+                Spacer(minLength: 8)
+                RingGauge(
+                    progress: Double(zone.batteryPercent) / 100,
+                    tint: zone.batteryPercent < ZoneRules.minimumBatteryPercent ? SX.warning : SX.safe,
+                    label: "Batt"
+                )
             }
-            VStack(alignment: .leading, spacing: 8) {
-                Text(zone.name)
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .foregroundStyle(SX.ink)
-                Text("\(zone.role.label) · \(zone.kind.label)")
-                    .font(.subheadline)
-                    .foregroundStyle(SX.secondary)
-                StatusPill(armed: zone.isArmed)
-            }
-            Spacer(minLength: 8)
-            RingGauge(
-                progress: Double(zone.batteryPercent) / 100,
-                tint: zone.batteryPercent < ZoneRules.minimumBatteryPercent ? SX.warning : SX.safe,
-                label: "Batt"
-            )
         }
-        .sxCard(padding: 18)
     }
 
     private func issueCard(_ zone: ZoneSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Needs attention before arming", systemImage: "exclamationmark.triangle.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(SX.warning)
-            ForEach(zone.issues, id: \.self) { fault in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(ZoneCopy.faultTitle(fault))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SX.ink)
-                    Text(ZoneCopy.faultDetail(fault))
-                        .font(.footnote)
-                        .foregroundStyle(SX.secondary)
+        AppCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Needs attention before arming", systemImage: "exclamationmark.triangle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SX.warning)
+                ForEach(zone.issues, id: \.self) { fault in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(ZoneCopy.faultTitle(fault))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SX.ink)
+                        Text(ZoneCopy.faultDetail(fault))
+                            .font(.footnote)
+                            .foregroundStyle(SX.secondary)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .sxCard()
     }
 
     @ViewBuilder
     private func action(_ zone: ZoneSnapshot) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if zone.isArmed {
-                FillButton(title: "Disarm zone", symbol: "lock.open.fill", tint: SX.accent) {
+                AppButton(
+                    title: "Disarm zone",
+                    style: .primary,
+                    systemImage: "lock.open.fill",
+                    tint: SX.accent
+                ) {
                     app.zones.pinError = nil
                     challenge = .disarmZone(zone.id)
                 }
@@ -121,11 +128,12 @@ struct ZoneDetailView: View {
                     .font(.footnote)
                     .foregroundStyle(SX.secondary)
             } else {
-                FillButton(
+                AppButton(
                     title: zone.primaryFault == nil ? "Arm zone" : "Cannot arm",
-                    symbol: "lock.fill",
-                    tint: SX.armed,
-                    enabled: zone.primaryFault == nil
+                    style: .primary,
+                    systemImage: "lock.fill",
+                    isDisabled: zone.primaryFault != nil,
+                    tint: SX.armed
                 ) {
                     app.zones.arm(id: zone.id)
                 }
@@ -222,33 +230,35 @@ struct ZoneDetailView: View {
                 .tracking(0.8)
                 .foregroundStyle(SX.secondary)
             if rows.isEmpty {
-                Text("No saved events for this zone yet.")
-                    .font(.subheadline)
-                    .foregroundStyle(SX.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .sxCard()
+                AppCard {
+                    Text("No saved events for this zone yet.")
+                        .font(.subheadline)
+                        .foregroundStyle(SX.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             } else {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(Array(rows)) { event in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(event.title)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(SX.ink)
-                                Spacer()
-                                Text(event.occurredAt, style: .relative)
-                                    .font(.caption)
+                AppCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(Array(rows)) { event in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text(event.title)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(SX.ink)
+                                    Spacer()
+                                    Text(event.occurredAt, style: .relative)
+                                        .font(.caption)
+                                        .foregroundStyle(SX.secondary)
+                                }
+                                Text(event.detail)
+                                    .font(.footnote)
                                     .foregroundStyle(SX.secondary)
+                                    .lineLimit(2)
                             }
-                            Text(event.detail)
-                                .font(.footnote)
-                                .foregroundStyle(SX.secondary)
-                                .lineLimit(2)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .sxCard()
             }
         }
     }

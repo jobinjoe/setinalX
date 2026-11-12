@@ -88,51 +88,61 @@ struct SettingsView: View {
         .sheet(isPresented: $showPIN) {
             ChangePINSheet()
         }
-        .confirmationDialog("Sign out of this panel?", isPresented: $confirmSignOut, titleVisibility: .visible) {
-            Button("Sign out", role: .destructive) { app.session.signOut() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Zones and events stay on this device.")
-        }
-        .confirmationDialog("Restore the demo zones?", isPresented: $confirmReset, titleVisibility: .visible) {
-            Button("Restore", role: .destructive) { app.zones.resetDemo() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("The current arming mix and the activity log will be replaced.")
-        }
-        .confirmationDialog("Clear the activity log?", isPresented: $confirmClear, titleVisibility: .visible) {
-            Button("Clear", role: .destructive) {
-                Task { await app.feed.clearAndRefresh() }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
+        .appSheet(
+            isPresented: $confirmSignOut,
+            title: "Sign out of this panel?",
+            message: "Zones and events stay on this device.",
+            style: .destructive,
+            confirmTitle: "Sign out",
+            cancelTitle: "Cancel",
+            onConfirm: { app.session.signOut() }
+        )
+        .appSheet(
+            isPresented: $confirmReset,
+            title: "Restore the demo zones?",
+            message: "The current arming mix and the activity log will be replaced.",
+            style: .destructive,
+            confirmTitle: "Restore",
+            cancelTitle: "Cancel",
+            onConfirm: { app.zones.resetDemo() }
+        )
+        .appSheet(
+            isPresented: $confirmClear,
+            title: "Clear the activity log?",
+            message: "Removes saved panel and cloud events from this device.",
+            style: .destructive,
+            confirmTitle: "Clear",
+            cancelTitle: "Cancel",
+            onConfirm: { Task { await app.feed.clearAndRefresh() } }
+        )
     }
 
     private var profile: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle().fill(SX.accent.opacity(0.18))
-                Image(systemName: "person.fill")
-                    .foregroundStyle(SX.accent)
-            }
-            .frame(width: 54, height: 54)
-            VStack(alignment: .leading, spacing: 6) {
-                TextField(
-                    "Operator name",
-                    text: Binding(
-                        get: { app.session.operatorName },
-                        set: { app.session.operatorName = $0 }
+        AppCard {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(SX.accent.opacity(0.18))
+                    Image(systemName: "person.fill")
+                        .foregroundStyle(SX.accent)
+                }
+                .frame(width: 54, height: 54)
+                VStack(alignment: .leading, spacing: 6) {
+                    TextField(
+                        "Operator name",
+                        text: Binding(
+                            get: { app.session.operatorName },
+                            set: { app.session.operatorName = $0 }
+                        )
                     )
-                )
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(SX.ink)
-                Text(app.session.email.isEmpty ? "Not signed in" : app.session.email)
-                    .font(.subheadline)
-                    .foregroundStyle(SX.secondary)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(SX.ink)
+                    Text(app.session.email.isEmpty ? "Not signed in" : app.session.email)
+                        .font(.subheadline)
+                        .foregroundStyle(SX.secondary)
+                }
+                Spacer()
             }
-            Spacer()
         }
-        .sxCard()
     }
 
     private var about: some View {
@@ -140,7 +150,7 @@ struct SettingsView: View {
             Text("SentinalX \(appVersion)")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(SX.secondary)
-            Text("Arming rules live in a pure service and are covered by XCTest. Zones and events are stored with SwiftData. The activity feed polls JSONPlaceholder with async/await.")
+            Text("UI builds on Lab 01 AppButton, AppCard, AppSheet, and AppTextField, restyled with SentinalX tokens. Arming rules live in a pure service and are covered by XCTest. Zones and events are stored with SwiftData. The activity feed polls JSONPlaceholder with async/await.")
                 .font(.footnote)
                 .foregroundStyle(SX.secondary)
         }
@@ -222,15 +232,33 @@ private struct ChangePINSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    pinField("Current PIN", text: $current)
-                    pinField("New PIN", text: $newPIN)
-                    pinField("Confirm new PIN", text: $confirm)
+                    AppTextField(
+                        title: "Current PIN",
+                        placeholder: "Current PIN",
+                        text: $current,
+                        isSecure: true,
+                        usesNumberPad: true
+                    )
+                    AppTextField(
+                        title: "New PIN",
+                        placeholder: "New PIN",
+                        text: $newPIN,
+                        isSecure: true,
+                        usesNumberPad: true
+                    )
+                    AppTextField(
+                        title: "Confirm new PIN",
+                        placeholder: "Confirm new PIN",
+                        text: $confirm,
+                        isSecure: true,
+                        usesNumberPad: true
+                    )
                     if let errorText {
                         Text(errorText)
                             .font(.footnote.weight(.medium))
                             .foregroundStyle(SX.critical)
                     }
-                    Text("Sign-in stays “\(DemoAccess.password)”. This PIN is only used to disarm.")
+                    Text("Sign-in stays \"\(DemoAccess.password)\". This PIN is only used to disarm.")
                         .font(.footnote)
                         .foregroundStyle(SX.secondary)
                 }
@@ -249,25 +277,6 @@ private struct ChangePINSheet: View {
                     Button("Save", action: save)
                 }
             }
-        }
-    }
-
-    private func pinField(_ title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SX.secondary)
-            SecureField(title, text: text)
-                .foregroundStyle(SX.ink)
-                #if os(iOS)
-                .keyboardType(.numberPad)
-                #endif
-                .padding(14)
-                .background(SX.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(SX.stroke, lineWidth: 1)
-                )
         }
     }
 
